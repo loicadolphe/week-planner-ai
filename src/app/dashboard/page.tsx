@@ -1,8 +1,8 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { WeeklyGoals } from "@/components/planning/WeeklyGoals";
-import { LinearIssueList } from "@/components/planning/LinearIssueList";
+import { PlanningItemList } from "@/components/planning/PlanningItemList";
 import { WeekPlanBoard } from "@/components/planning/WeekPlanBoard";
-import { mockGoals, mockLinearIssues, mockWeekPlan } from "@/lib/planning/mock-data";
+import { mockGoals, mockPlanningItems, mockWeekPlan } from "@/lib/planning/mock-data";
 
 export default function DashboardPage() {
   return (
@@ -10,7 +10,7 @@ export default function DashboardPage() {
       <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <WeeklyGoals goals={mockGoals} />
-          <LinearIssueList issues={mockLinearIssues} />
+          <PlanningItemList items={mockPlanningItems} />
         </div>
         <WeekPlanBoard weekPlan={mockWeekPlan} />
       </div>

@@ -1,4 +1,4 @@
-import type { WeekPlan, WeekDay, PlanningTask } from "@/types/planning";
+import type { WeekPlan, WeekDay, ScheduledBlock } from "@/types/planning";
 
 interface WeekPlanBoardProps {
   weekPlan: WeekPlan;
@@ -13,13 +13,21 @@ const weekDays: { key: WeekDay; label: string }[] = [
 ];
 
 export function WeekPlanBoard({ weekPlan }: WeekPlanBoardProps) {
-  const getTotalHours = (tasks: PlanningTask[]) => {
-    return tasks.reduce((sum, task) => sum + task.estimateHours, 0);
+  const getTotalMinutes = (blocks: ScheduledBlock[]) => {
+    return blocks.reduce((sum, block) => sum + block.estimateMinutes, 0);
   };
 
-  const sourceColors = {
-    goal: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400",
-    linear: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+  const formatMinutes = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours === 0) return `${mins}m`;
+    if (mins === 0) return `${hours}h`;
+    return `${hours}h ${mins}m`;
+  };
+
+  const formatTimeRange = (startTime?: string, endTime?: string) => {
+    if (!startTime || !endTime) return null;
+    return `${startTime} - ${endTime}`;
   };
 
   return (
@@ -29,8 +37,8 @@ export function WeekPlanBoard({ weekPlan }: WeekPlanBoardProps) {
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {weekDays.map(({ key, label }) => {
-          const tasks = weekPlan[key];
-          const totalHours = getTotalHours(tasks);
+          const blocks = weekPlan[key];
+          const totalMinutes = getTotalMinutes(blocks);
 
           return (
             <div
@@ -42,35 +50,37 @@ export function WeekPlanBoard({ weekPlan }: WeekPlanBoardProps) {
                   {label}
                 </h3>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  {totalHours}h planned
+                  {formatMinutes(totalMinutes)} planned
                 </p>
               </div>
               <div className="space-y-2">
-                {tasks.length === 0 ? (
+                {blocks.length === 0 ? (
                   <p className="text-sm text-zinc-500 dark:text-zinc-400 italic">
-                    No tasks planned
+                    No blocks scheduled
                   </p>
                 ) : (
-                  tasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-600 rounded shadow-sm"
-                    >
-                      <div className="flex items-start gap-2 mb-2">
-                        <span
-                          className={`px-2 py-0.5 rounded text-xs font-medium ${sourceColors[task.source]}`}
-                        >
-                          {task.source}
-                        </span>
+                  blocks.map((block) => {
+                    const timeRange = formatTimeRange(block.startTime, block.endTime);
+                    
+                    return (
+                      <div
+                        key={block.id}
+                        className="p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-600 rounded shadow-sm"
+                      >
+                        {timeRange && (
+                          <div className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1">
+                            {timeRange}
+                          </div>
+                        )}
+                        <p className="text-sm font-medium text-zinc-900 dark:text-white mb-1">
+                          {block.title}
+                        </p>
+                        <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                          {formatMinutes(block.estimateMinutes)}
+                        </p>
                       </div>
-                      <p className="text-sm font-medium text-zinc-900 dark:text-white mb-1">
-                        {task.title}
-                      </p>
-                      <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                        {task.estimateHours}h
-                      </p>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
