@@ -39,6 +39,26 @@ export default function DashboardPage() {
     });
   };
 
+  const handleMoveBlock = (blockId: string, fromDay: keyof WeekPlan, toDay: keyof WeekPlan) => {
+    const block = weekPlan[fromDay].find((b) => b.id === blockId);
+    if (!block) return;
+
+    const updatedBlock = { ...block, day: toDay };
+    
+    setWeekPlan({
+      ...weekPlan,
+      [fromDay]: weekPlan[fromDay].filter((b) => b.id !== blockId),
+      [toDay]: [...weekPlan[toDay], updatedBlock],
+    });
+  };
+
+  const handleRemoveBlock = (blockId: string, day: keyof WeekPlan) => {
+    setWeekPlan({
+      ...weekPlan,
+      [day]: weekPlan[day].filter((b) => b.id !== blockId),
+    });
+  };
+
   return (
     <AppShell>
       <div className="space-y-6">
@@ -50,7 +70,11 @@ export default function DashboardPage() {
             onScheduleItem={handleScheduleItem}
           />
         </div>
-        <WeekPlanBoard weekPlan={weekPlan} />
+        <WeekPlanBoard 
+          weekPlan={weekPlan} 
+          onMoveBlock={handleMoveBlock}
+          onRemoveBlock={handleRemoveBlock}
+        />
       </div>
     </AppShell>
   );
