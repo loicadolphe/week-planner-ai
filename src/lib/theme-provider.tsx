@@ -18,26 +18,20 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>("light");
-  const [mounted, setMounted] = useState(false);
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "light";
+  
+  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (stored === "light" || stored === "dark") {
+    return stored;
+  }
+  
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
 
-  useEffect(() => {
-    setMounted(true);
-    
-    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-    
-    if (stored === "light" || stored === "dark") {
-      setThemeState(stored);
-      updateDOMTheme(stored);
-    } else {
-      const systemPreference = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-      setThemeState(systemPreference);
-      updateDOMTheme(systemPreference);
-    }
-  }, []);
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const [mounted, setMounted] = useState(false);
 
   const updateDOMTheme = (newTheme: Theme) => {
     const root = document.documentElement;
@@ -48,9 +42,13 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     }
   };
 
+  useEffect(() => {
+    queueMicrotask(() => setMounted(true));
+    updateDOMTheme(theme);
+  }, [theme]);
+
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    updateDOMTheme(newTheme);
     window.localStorage.setItem(THEME_STORAGE_KEY, newTheme);
   };
 
