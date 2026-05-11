@@ -15,7 +15,7 @@ The `/dashboard` implementation has **drifted significantly** from the core prod
 - ✅ The UI supports work and non-work planning (work, personal, errands, wellbeing)
 - ✅ Manual workflow is functional with drag-and-drop scheduling
 - ✅ Goals, backlog, and week plan sections are clearly visible
-- ❌ **Critical**: Dashboard uses a different type system (`planner.ts`) instead of the core model (`planning.ts`)
+- ✅ **Resolved**: Dashboard now uses the core model (`planning.ts`); deprecated `planner.ts` has been removed
 - ❌ **Critical**: PlanningItem → ScheduledBlock relationship is broken (no `planningItemId` link)
 - ❌ **Medium**: Category system was introduced outside the core model
 - ❌ **Medium**: Several model fields are missing from implementation
@@ -27,16 +27,14 @@ The `/dashboard` implementation has **drifted significantly** from the core prod
 
 ### 1.1 Duplicate Type Definitions
 
-The dashboard uses **two separate type systems**:
+**Status: ✅ RESOLVED**
 
-1. **`/src/types/planning.ts`** — Core product model (documented in `docs/product-model.md`)
-2. **`/src/types/planner.ts`** — Simplified dashboard model (used by current implementation)
+The dashboard previously used two separate type systems, but has now been migrated:
 
-**Impact**: The dashboard is NOT using the core product model. This creates:
-- Maintenance burden (two models to keep in sync)
-- Risk of further drift
-- Confusion about which model is authoritative
-- Difficulty integrating future features that depend on the core model
+1. **`/src/types/planning.ts`** — Core product model (documented in `docs/product-model.md`) ✅ **Now in use**
+2. **`/src/types/planner.ts`** — ~~Simplified dashboard model~~ ✅ **Removed (deprecated)**
+
+**Resolution**: The deprecated `planner.ts` has been removed. The dashboard now uses the core product model from `planning.ts`, eliminating the maintenance burden and model drift issues.
 
 ### 1.2 Goal Model Drift
 
