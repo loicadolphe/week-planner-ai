@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useLayoutEffect, useState } from "react";
 
 type Theme = "light" | "dark";
 
@@ -18,33 +18,39 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "light";
-  
-  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-  if (stored === "light" || stored === "dark") {
-    return stored;
-  }
-  
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<Theme>("light");
 
-  const updateDOMTheme = (newTheme: Theme) => {
+  useLayoutEffect(() => {
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+    let initialTheme: Theme = "light";
+    
+    if (stored === "light" || stored === "dark") {
+      initialTheme = stored;
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      initialTheme = "dark";
+    }
+    
     const root = document.documentElement;
-    if (newTheme === "dark") {
+    if (initialTheme === "dark") {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
     }
-  };
+    
+    if (initialTheme !== theme) {
+      queueMicrotask(() => setThemeState(initialTheme));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  useEffect(() => {
-    queueMicrotask(() => setMounted(true));
-    updateDOMTheme(theme);
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
   }, [theme]);
 
   const setTheme = (newTheme: Theme) => {
@@ -55,10 +61,6 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
