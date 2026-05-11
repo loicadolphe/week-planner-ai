@@ -1,8 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #FAFAF7;
+  --surface: #FFF;
+  --surface-2: #F4F2EC;
+  --line: #ECE9E1;
+  --line-strong: #D9D5CB;
+  --line-soft: #F1EEE7;
+  --ink-1: #19191A;
+  --ink-2: #45464B;
+  --ink-3: #7A7B82;
+  --ink-4: #AFB0B5;
+  --ink-5: #D2D3D7;
+  --accent: oklch(0.56 0.10 240);
+  --accent-bg: oklch(0.96 0.02 240);
+  --accent-line: oklch(0.86 0.04 240);
+  --warn: oklch(0.62 0.13 35);
+  --warn-2: oklch(0.50 0.13 35);
+  --warn-bg: oklch(0.97 0.03 40);
+  --warn-line: oklch(0.85 0.07 35);
+  --good: oklch(0.58 0.07 150);
+  --cat-work: oklch(0.62 0.06 240);
+  --cat-personal: oklch(0.62 0.06 320);
+  --cat-errands: oklch(0.62 0.06 60);
+  --cat-wellbeing: oklch(0.62 0.06 150);
+  --cat-work-text: oklch(0.42 0.06 240);
+  --cat-personal-text: oklch(0.42 0.06 320);
+  --cat-errands-text: oklch(0.42 0.06 60);
+  --cat-wellbeing-text: oklch(0.42 0.06 150);
+  --background: var(--bg);
+  --foreground: var(--ink-1);
 }
 
 @theme inline {
@@ -10,17 +37,222 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-serif: var(--font-instrument-serif);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.planner-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--accent-bg) 72%, transparent), transparent 30rem),
+    var(--bg);
+  color: var(--ink-1);
+}
+
+.mono {
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.schedule-serif {
+  font-family: var(--font-instrument-serif), Georgia, serif;
+}
+
+.planner-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgb(25 25 26 / 0.04);
+}
+
+.planner-subcard {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.planner-input {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink-1);
+  font-size: 13px;
+  outline: none;
+  padding: 10px 11px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.planner-input:focus {
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-bg) 72%, transparent);
+}
+
+.planner-button {
+  align-items: center;
+  background: var(--ink-1);
+  border: 1px solid var(--ink-1);
+  border-radius: 10px;
+  color: white;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 540;
+  gap: 6px;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.planner-button:hover {
+  background: var(--ink-2);
+  border-color: var(--ink-2);
+}
+
+.planner-button.secondary {
+  background: var(--surface);
+  border-color: var(--line-strong);
+  color: var(--ink-2);
+}
+
+.planner-button.secondary:hover {
+  background: var(--surface-2);
+  color: var(--ink-1);
+}
+
+.chip {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-3);
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 540;
+  gap: 6px;
+  min-height: 27px;
+  padding: 0 10px;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.chip.is-active {
+  background: var(--ink-1);
+  border-color: var(--ink-1);
+  color: var(--surface);
+}
+
+.category-rail {
+  bottom: 9px;
+  left: 0;
+  position: absolute;
+  top: 9px;
+  width: 2px;
+}
+
+.no-bars .category-rail {
+  display: none;
+}
+
+.cat-work {
+  --cat-color: var(--cat-work);
+  --cat-text: var(--cat-work-text);
+}
+
+.cat-personal {
+  --cat-color: var(--cat-personal);
+  --cat-text: var(--cat-personal-text);
+}
+
+.cat-errands {
+  --cat-color: var(--cat-errands);
+  --cat-text: var(--cat-errands-text);
+}
+
+.cat-wellbeing {
+  --cat-color: var(--cat-wellbeing);
+  --cat-text: var(--cat-wellbeing-text);
+}
+
+.capacity-bar {
+  background: var(--line-soft);
+  border-radius: 999px;
+  height: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.capacity-fill {
+  border-radius: 999px;
+  height: 100%;
+  transition: width 250ms ease;
+}
+
+.capacity-fill.open {
+  background: var(--ink-5);
+}
+
+.capacity-fill.light {
+  background: oklch(0.70 0.06 150);
+}
+
+.capacity-fill.balanced {
+  background: var(--good);
+}
+
+.capacity-fill.full {
+  background: var(--accent);
+}
+
+.capacity-fill.overloaded {
+  background: var(--warn);
+}
+
+.capacity-overflow {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--warn-2) 0,
+      var(--warn-2) 3px,
+      transparent 3px,
+      transparent 7px
+    ),
+    var(--warn-bg);
+  border-left: 1px solid var(--warn-2);
+  height: 100%;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.day-drop-active {
+  background: var(--accent-bg);
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-line) 42%, transparent);
+}
+
+.day-overloaded {
+  border-color: var(--warn-line);
+}
+
+@media (max-width: 640px) {
+  .desktop-planner {
+    display: none;
+  }
+}
+
+@media (min-width: 641px) {
+  .mobile-planner {
+    display: none;
+  }
 }
