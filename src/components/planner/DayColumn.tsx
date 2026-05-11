@@ -28,10 +28,13 @@ export function DayColumn({ day, blocks, planningItems, weekOf, onUnschedule }: 
   return (
     <section
       ref={setNodeRef}
-      className={`flex min-h-[460px] flex-col rounded-[14px] border bg-white p-3 transition-all ${
+      className={`flex min-h-[460px] flex-col rounded-[14px] border p-3 transition-all ${
         isOver ? "day-drop-active" : ""
       } ${state === "overloaded" ? "day-overloaded" : ""}`}
-      style={{ borderColor: state === "overloaded" ? "var(--warn-line)" : "var(--line)" }}
+      style={{ 
+        background: "var(--surface)",
+        borderColor: state === "overloaded" ? "var(--warn-line)" : "var(--line)" 
+      }}
     >
       <header className="mb-3 space-y-3">
         <div className="flex items-start justify-between gap-2">

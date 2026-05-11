@@ -16,6 +16,7 @@ import { Header } from "@/components/planner/Header";
 import { WeekBoard } from "@/components/planner/WeekBoard";
 import { MobileBoard } from "@/components/planner/mobile/MobileBoard";
 import { MobileTab, MobileTabs } from "@/components/planner/mobile/MobileTabs";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { DAY_ORDER, sumMinutes, uid } from "@/lib/format";
 import type { WeekDay, Goal, PlanningItem, WeekPlan } from "@/types/planning";
 
@@ -205,13 +206,16 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
       ) : null}
 
       <main className={forceMobile ? "mx-auto min-h-screen max-w-[430px] px-5 py-5" : "mobile-planner px-5 py-5"}>
-        <div className="mb-4">
-          <p className="mono text-[11px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-3)" }}>
-            Week Planner AI
-          </p>
-          <h1 className="mt-1 text-[20px] font-[540]" style={{ color: "var(--ink-1)" }}>
-            This week
-          </h1>
+        <div className="mb-4 flex items-start justify-between">
+          <div>
+            <p className="mono text-[11px] uppercase tracking-[0.08em]" style={{ color: "var(--ink-3)" }}>
+              Week Planner AI
+            </p>
+            <h1 className="mt-1 text-[20px] font-[540]" style={{ color: "var(--ink-1)" }}>
+              This week
+            </h1>
+          </div>
+          <ThemeToggle />
         </div>
         <div className="mb-4">
           <MobileTabs

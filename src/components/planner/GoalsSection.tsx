@@ -56,8 +56,8 @@ export function GoalsSection({
         {goals.map((goal) => (
           <label
             key={goal.id}
-            className="group flex items-start gap-3 rounded-[10px] border bg-white p-3 transition-colors hover:bg-[var(--surface-2)]"
-            style={{ borderColor: "var(--line)" }}
+            className="group flex items-start gap-3 rounded-[10px] border p-3 transition-colors hover:bg-[var(--surface-2)]"
+            style={{ background: "var(--surface)", borderColor: "var(--line)" }}
           >
             <input
               type="checkbox"

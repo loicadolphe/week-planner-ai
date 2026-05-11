@@ -37,8 +37,8 @@ export function SchedulePopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[330px] rounded-[14px] border bg-white p-3 shadow-xl shadow-black/10" 
-        style={{ borderColor: "var(--line)" }}
+        className="w-[330px] rounded-[14px] border p-3 shadow-xl shadow-black/10" 
+        style={{ background: "var(--surface)", borderColor: "var(--line)" }}
         align="end"
       >
         <div className="schedule-serif mb-2 text-[15px]" style={{ color: "var(--ink-1)" }}>
