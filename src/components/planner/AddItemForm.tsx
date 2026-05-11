@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 import type { Category, PlanningItem, PlanningItemType } from "@/types/planning";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Priority = "low" | "medium" | "high";
 
@@ -73,43 +80,61 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
         />
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <select
-          className="planner-input"
-          aria-label="Category"
+        <Select
           value={category}
-          onChange={(event) => setCategory(event.target.value as Category | "")}
+          onValueChange={(value) => setCategory(value as Category | "")}
         >
-          <option value="">No category</option>
-          {categoryOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <select
-          className="planner-input"
-          aria-label="Type"
+          <SelectTrigger 
+            className="planner-input h-auto"
+            aria-label="Category"
+          >
+            <SelectValue placeholder="No category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">No category</SelectItem>
+            {categoryOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
           value={type}
-          onChange={(event) => setType(event.target.value as PlanningItemType)}
+          onValueChange={(value) => setType(value as PlanningItemType)}
         >
-          {typeOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger 
+            className="planner-input h-auto"
+            aria-label="Type"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {typeOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="grid grid-cols-[1fr_92px_auto] gap-2">
-        <select
-          className="planner-input"
-          aria-label="Priority"
+        <Select
           value={priority}
-          onChange={(event) => setPriority(event.target.value as Priority)}
+          onValueChange={(value) => setPriority(value as Priority)}
         >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
+          <SelectTrigger 
+            className="planner-input h-auto"
+            aria-label="Priority"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+          </SelectContent>
+        </Select>
         <input
           className="planner-input mono"
           aria-label="Duration in hours"
