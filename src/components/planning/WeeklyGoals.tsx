@@ -141,11 +141,13 @@ export function WeeklyGoals({ goals, onAddGoal }: WeeklyGoalsProps) {
                   </p>
                 )}
               </div>
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium ${priorityColors[goal.priority]}`}
-              >
-                {goal.priority}
-              </span>
+              {goal.priority && (
+                <span
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium ${priorityColors[goal.priority]}`}
+                >
+                  {goal.priority}
+                </span>
+              )}
             </div>
           </div>
         ))}

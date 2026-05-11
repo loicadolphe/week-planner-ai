@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import type { DayKey, PlanningItem } from "@/types/planner";
+import type { WeekDay, PlanningItem } from "@/types/planning";
 import { fmtDuration } from "@/lib/format";
 import { CategoryMark, categoryClass } from "./CategoryMark";
 import { PriorityDot } from "./PriorityDot";
@@ -11,8 +11,8 @@ import { TypeLabel } from "./TypeLabel";
 
 interface ItemProps {
   item: PlanningItem;
-  dayTotals: Record<DayKey, number>;
-  onSchedule: (itemId: string, day: DayKey) => void;
+  dayTotals: Record<WeekDay, number>;
+  onSchedule: (itemId: string, day: WeekDay) => void;
   onDelete: (itemId: string) => void;
 }
 
@@ -26,7 +26,7 @@ export function Item({ item, dayTotals, onSchedule, onDelete }: ItemProps) {
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
 
-  const handleSchedule = (itemId: string, day: DayKey) => {
+  const handleSchedule = (itemId: string, day: WeekDay) => {
     onSchedule(itemId, day);
     setIsScheduling(false);
   };
@@ -57,7 +57,7 @@ export function Item({ item, dayTotals, onSchedule, onDelete }: ItemProps) {
             {item.title}
           </h3>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]" style={{ color: "var(--ink-3)" }}>
-            <span className="mono">{fmtDuration(item.duration)}</span>
+            <span className="mono">{fmtDuration(item.estimateMinutes || 60)}</span>
             <TypeLabel type={item.type} />
             <PriorityDot priority={item.priority} />
             <CategoryMark category={item.category} />

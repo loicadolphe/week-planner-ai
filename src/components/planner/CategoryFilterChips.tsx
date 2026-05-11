@@ -1,4 +1,4 @@
-import type { Category } from "@/types/planner";
+import type { Category } from "@/types/planning";
 import { categoryLabels, categoryOrder } from "./CategoryMark";
 
 export type CategoryFilter = Category | "all";

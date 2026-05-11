@@ -2,8 +2,11 @@ export type Goal = {
   id: string;
   title: string;
   description?: string;
-  priority: "low" | "medium" | "high";
+  priority?: "low" | "medium" | "high";
+  done?: boolean;
 };
+
+export type Category = "work" | "personal" | "errands" | "wellbeing";
 
 export type PlanningItemType =
   | "task"
@@ -38,18 +41,23 @@ export type PlanningItem = {
   priority?: "low" | "medium" | "high" | "urgent";
   estimateMinutes?: number;
   dueDate?: string;
+  category?: Category;
 };
 
 export type WeekDay = "monday" | "tuesday" | "wednesday" | "thursday" | "friday";
 
 export type ScheduledBlock = {
   id: string;
-  title: string;
-  planningItemId?: string;
-  estimateMinutes: number;
+  planningItemId: string;
   day: WeekDay;
+  estimateMinutes: number;
   startTime?: string;
   endTime?: string;
 };
 
-export type WeekPlan = Record<WeekDay, ScheduledBlock[]>;
+export type WeekPlan = {
+  weekOf: string;
+  goals: Goal[];
+  planningItems: PlanningItem[];
+  scheduledBlocks: Record<WeekDay, ScheduledBlock[]>;
+};

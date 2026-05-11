@@ -1,6 +1,6 @@
-import type { PlanningType } from "@/types/planner";
+import type { PlanningItemType } from "@/types/planning";
 
-const typeLabels: Record<PlanningType, string> = {
+const typeLabels: Record<PlanningItemType, string> = {
   task: "Task",
   project: "Project",
   meeting_prep: "Meeting prep",
@@ -13,7 +13,7 @@ const typeLabels: Record<PlanningType, string> = {
 };
 
 interface TypeLabelProps {
-  type: PlanningType;
+  type: PlanningItemType;
 }
 
 export function TypeLabel({ type }: TypeLabelProps) {

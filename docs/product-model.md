@@ -56,13 +56,15 @@ A **PlanningItem** represents a specific unit of work that the user can schedule
 - `id`: Unique identifier
 - `title`: What needs to be done
 - `description`: Optional details about the work
-- `estimatedDuration`: How long the user expects this to take (in minutes)
-- `priority`: User-assigned priority (e.g., "high", "medium", "low")
+- `estimateMinutes`: How long the user expects this to take (in minutes)
+- `type`: The kind of work (e.g., "task", "project", "meeting_prep", "review")
+- `priority`: User-assigned priority (e.g., "high", "medium", "low", "urgent")
 - `source`: Where this item came from (e.g., "linear", "manual", "github")
-- `sourceId`: External identifier if imported (e.g., Linear issue ID)
-- `sourceUrl`: Link to the original item in the external system
-- `goalId`: Optional reference to the goal this supports
+- `externalId`: External identifier if imported (e.g., Linear issue ID)
+- `externalUrl`: Link to the original item in the external system
+- `category`: Optional high-level grouping (e.g., "work", "personal", "errands", "wellbeing")
 - `status`: Current state (e.g., "candidate", "selected", "scheduled", "completed")
+- `dueDate`: Optional deadline for this item
 - `metadata`: Integration-specific data (stored as JSON)
 - `createdAt`: When the item was added
 - `updatedAt`: When the item was last modified
@@ -96,18 +98,29 @@ A **PlanningItem** represents a specific unit of work that the user can schedule
 
 A **ScheduledBlock** represents a specific time slot in the user's calendar where a planning item is scheduled to be worked on.
 
+**Key Design Principle:** Scheduled blocks **reference** planning items rather than copying their data. This ensures:
+- The source planning item metadata remains intact
+- Unscheduling a block doesn't lose the original item
+- Multiple blocks can reference the same item if work is split across days
+- Changes to planning item details are reflected in all scheduled blocks
+
 **Properties:**
 - `id`: Unique identifier
-- `planningItemId`: Reference to the planning item being scheduled
-- `startTime`: When the block begins (ISO 8601 datetime)
-- `endTime`: When the block ends (ISO 8601 datetime)
-- `duration`: Length of the block in minutes (derived from start/end)
-- `date`: The date this block occurs (YYYY-MM-DD)
-- `dayOfWeek`: Which day (e.g., "Monday", "Tuesday")
+- `planningItemId`: Reference to the planning item being scheduled (REQUIRED)
+- `day`: Which weekday this is scheduled for (e.g., "monday", "tuesday")
+- `estimateMinutes`: Duration estimate for this scheduled block
+- `startTime`: Optional specific start time (ISO 8601 time)
+- `endTime`: Optional specific end time (ISO 8601 time)
 - `isLocked`: Whether this block can be automatically moved by AI
 - `notes`: Optional user notes about this specific block
 - `createdAt`: When the block was created
 - `updatedAt`: When the block was last modified
+
+**Why Blocks Reference Items:**
+When you schedule a planning item, a scheduled block is created that points back to the original item via `planningItemId`. The block stores timing information (which day, how long), while the item stores metadata (title, type, category, source, etc.). This separation allows:
+- Easy unscheduling without data loss
+- Consistent item metadata across multiple scheduled instances
+- Clear distinction between "what to work on" (item) and "when to work on it" (block)
 
 **Characteristics:**
 - Blocks represent **committed time** in the schedule
@@ -157,6 +170,77 @@ A **WeekPlan** is the complete planning document for a given week, containing go
 1. **Draft**: User is building the plan (setting goals, selecting items, scheduling)
 2. **Active**: Week has started, plan is in effect
 3. **Completed**: Week is over, plan is archived
+
+---
+
+## Category vs Type
+
+Planning items have both a **category** and a **type**, which serve different purposes:
+
+### Category (Optional)
+
+Categories are **high-level life domains** that help users organize work holistically:
+- `work`: Professional tasks and projects
+- `personal`: Personal life items (appointments, errands at home)
+- `errands`: Things to do outside (shopping, pickups, appointments)
+- `wellbeing`: Health, exercise, mental health, rest
+
+**Purpose:**
+- Visual grouping and filtering in the UI
+- Work-life balance awareness
+- Holistic weekly planning across all life areas
+- No productivity tool origin (user-facing concept)
+
+**Examples:**
+- "Implement OAuth2" → `category: "work"`
+- "Book dentist appointment" → `category: "personal"`
+- "Pick up dry cleaning" → `category: "errands"`
+- "Go for a run" → `category: "wellbeing"`
+
+### Type (Required)
+
+Types are **work classification labels** that describe the nature of the task:
+- `task`: A concrete, actionable to-do
+- `project`: A larger body of work
+- `meeting_prep`: Preparation for a meeting
+- `follow_up`: Following up on a conversation or request
+- `decision`: Making a decision or weighing options
+- `review`: Reviewing documents, code, or work
+- `stakeholder_update`: Communicating progress to stakeholders
+- `personal`: Personal tasks (overlaps with category for non-work items)
+- `other`: Anything else
+
+**Purpose:**
+- Work breakdown and task classification
+- Integration mapping (e.g., Linear issue type → planning item type)
+- AI suggestions for time estimates
+- Workflow-specific features
+
+**Examples:**
+- "Implement OAuth2" → `type: "task"`
+- "Ship the auth feature" → `type: "project"`
+- "Prepare Q2 roadmap slides" → `type: "meeting_prep"`
+- "Check in with Sarah on PR feedback" → `type: "follow_up"`
+
+### When to Use Which
+
+**Use category** when:
+- Filtering or grouping items by life domain
+- Visualizing work-life balance
+- UI color-coding and visual organization
+- The user wants to see "all personal stuff this week"
+
+**Use type** when:
+- Mapping external integrations (Jira issue type, Linear label, etc.)
+- AI estimating time (reviews are shorter than projects)
+- Filtering by workflow stage
+- The user wants to see "all decisions I need to make"
+
+**Both can be set:**
+A single item can have both:
+- "Book dentist appointment" → `category: "personal"`, `type: "task"`
+- "Prepare slides for board meeting" → `category: "work"`, `type: "meeting_prep"`
+- "Review team's architecture proposal" → `category: "work"`, `type: "review"`
 
 ---
 
