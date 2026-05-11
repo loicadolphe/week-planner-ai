@@ -37,7 +37,7 @@ interface AddItemFormProps {
 
 export function AddItemForm({ onAddItem }: AddItemFormProps) {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<Category | "">("work");
+  const [category, setCategory] = useState<Category | "none">("work");
   const [type, setType] = useState<PlanningItemType>("task");
   const [priority, setPriority] = useState<Priority>("medium");
   const [duration, setDuration] = useState("1");
@@ -51,7 +51,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
 
     onAddItem({
       title: trimmed,
-      category: category || undefined,
+      category: category === "none" ? undefined : category,
       type,
       source: "manual",
       priority,
@@ -82,7 +82,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
       <div className="grid grid-cols-2 gap-2">
         <Select
           value={category}
-          onValueChange={(value) => setCategory(value as Category | "")}
+          onValueChange={(value) => setCategory(value as Category | "none")}
         >
           <SelectTrigger 
             className="planner-input h-auto"
@@ -91,7 +91,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
             <SelectValue placeholder="No category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">No category</SelectItem>
+            <SelectItem value="none">No category</SelectItem>
             {categoryOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
