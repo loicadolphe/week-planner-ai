@@ -64,18 +64,13 @@ export function Item({ item, dayTotals, onSchedule, onDelete }: ItemProps) {
           </div>
         </div>
         <div className="relative flex shrink-0 items-center gap-1">
-          <button
-            type="button"
-            className="rounded-md px-2 py-1 text-[11px] font-[540] transition-colors hover:bg-[var(--surface-2)]"
-            style={{ color: "var(--accent)" }}
-            onPointerDown={(event) => event.stopPropagation()}
-            onClick={(event) => {
-              event.stopPropagation();
-              setIsScheduling((current) => !current);
-            }}
-          >
-            Schedule
-          </button>
+          <SchedulePopover
+            item={item}
+            dayTotals={dayTotals}
+            onSchedule={handleSchedule}
+            open={isScheduling}
+            onOpenChange={setIsScheduling}
+          />
           <button
             type="button"
             aria-label={`Delete ${item.title}`}
@@ -89,13 +84,6 @@ export function Item({ item, dayTotals, onSchedule, onDelete }: ItemProps) {
           >
             x
           </button>
-          {isScheduling ? (
-            <SchedulePopover
-              item={item}
-              dayTotals={dayTotals}
-              onSchedule={handleSchedule}
-            />
-          ) : null}
         </div>
       </div>
     </article>

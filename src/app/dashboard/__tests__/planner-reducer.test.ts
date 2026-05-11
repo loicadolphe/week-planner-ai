@@ -1,5 +1,4 @@
-import { describe, it } from "node:test";
-import assert from "node:assert/strict";
+import { describe, it, expect } from "vitest";
 import type { WeekPlan, PlanningItem, ScheduledBlock } from "@/types/planning";
 
 // Extract reducer logic for testing
@@ -115,11 +114,11 @@ describe("Planner Reducer - Model Alignment Tests", () => {
       day: "monday",
     });
 
-    assert.equal(result.scheduledBlocks.monday.length, 1);
+    expect(result.scheduledBlocks.monday).toHaveLength(1);
     const block = result.scheduledBlocks.monday[0];
-    assert.equal(block.planningItemId, "item-1");
-    assert.equal(block.estimateMinutes, 120);
-    assert.equal(block.day, "monday");
+    expect(block.planningItemId).toBe("item-1");
+    expect(block.estimateMinutes).toBe(120);
+    expect(block.day).toBe("monday");
   });
 
   it("scheduling does not delete or mutate the source PlanningItem", () => {
@@ -132,21 +131,18 @@ describe("Planner Reducer - Model Alignment Tests", () => {
       day: "monday",
     });
 
-    // Original planning item still exists
     const itemAfter = result.planningItems.find((item) => item.id === "item-1");
-    assert.ok(itemAfter, "Planning item should still exist");
-    assert.equal(itemAfter.id, originalItem!.id);
-    assert.equal(itemAfter.title, originalItem!.title);
-    assert.equal(itemAfter.estimateMinutes, originalItem!.estimateMinutes);
+    expect(itemAfter).toBeDefined();
+    expect(itemAfter!.id).toBe(originalItem!.id);
+    expect(itemAfter!.title).toBe(originalItem!.title);
+    expect(itemAfter!.estimateMinutes).toBe(originalItem!.estimateMinutes);
     
-    // Planning items array length unchanged
-    assert.equal(result.planningItems.length, plan.planningItems.length);
+    expect(result.planningItems).toHaveLength(plan.planningItems.length);
   });
 
   it("removing/unscheduling a ScheduledBlock leaves the source PlanningItem intact", () => {
     const plan = createMockPlan();
     
-    // First schedule an item
     const scheduled = plannerReducer(plan, {
       type: "schedule_item",
       itemId: "item-1",
@@ -156,30 +152,26 @@ describe("Planner Reducer - Model Alignment Tests", () => {
     const blockId = scheduled.scheduledBlocks.monday[0].id;
     const planningItemsBefore = scheduled.planningItems.length;
     
-    // Then unschedule it
     const result = plannerReducer(scheduled, {
       type: "unschedule_block",
       blockId,
       day: "monday",
     });
 
-    // Block is removed
-    assert.equal(result.scheduledBlocks.monday.length, 0);
+    expect(result.scheduledBlocks.monday).toHaveLength(0);
     
-    // Planning item still exists with all metadata
-    assert.equal(result.planningItems.length, planningItemsBefore);
+    expect(result.planningItems).toHaveLength(planningItemsBefore);
     const item = result.planningItems.find((item) => item.id === "item-1");
-    assert.ok(item, "Planning item should still exist");
-    assert.equal(item.title, "Test Task");
-    assert.equal(item.estimateMinutes, 120);
-    assert.equal(item.source, "manual");
-    assert.equal(item.category, "work");
+    expect(item).toBeDefined();
+    expect(item!.title).toBe("Test Task");
+    expect(item!.estimateMinutes).toBe(120);
+    expect(item!.source).toBe("manual");
+    expect(item!.category).toBe("work");
   });
 
   it("moving a ScheduledBlock preserves planningItemId", () => {
     const plan = createMockPlan();
     
-    // Schedule an item on Monday
     const scheduled = plannerReducer(plan, {
       type: "schedule_item",
       itemId: "item-2",
@@ -189,7 +181,6 @@ describe("Planner Reducer - Model Alignment Tests", () => {
     const blockId = scheduled.scheduledBlocks.monday[0].id;
     const originalPlanningItemId = scheduled.scheduledBlocks.monday[0].planningItemId;
     
-    // Move to Tuesday
     const result = plannerReducer(scheduled, {
       type: "move_block",
       blockId,
@@ -197,19 +188,16 @@ describe("Planner Reducer - Model Alignment Tests", () => {
       toDay: "tuesday",
     });
 
-    // Block moved from Monday to Tuesday
-    assert.equal(result.scheduledBlocks.monday.length, 0);
-    assert.equal(result.scheduledBlocks.tuesday.length, 1);
+    expect(result.scheduledBlocks.monday).toHaveLength(0);
+    expect(result.scheduledBlocks.tuesday).toHaveLength(1);
     
-    // planningItemId is preserved
     const movedBlock = result.scheduledBlocks.tuesday[0];
-    assert.equal(movedBlock.planningItemId, originalPlanningItemId);
-    assert.equal(movedBlock.planningItemId, "item-2");
+    expect(movedBlock.planningItemId).toBe(originalPlanningItemId);
+    expect(movedBlock.planningItemId).toBe("item-2");
     
-    // Planning item still exists unchanged
     const item = result.planningItems.find((item) => item.id === "item-2");
-    assert.ok(item, "Planning item should still exist");
-    assert.equal(item.title, "Another Task");
+    expect(item).toBeDefined();
+    expect(item!.title).toBe("Another Task");
   });
 
   it("scheduling uses estimateMinutes (not duration)", () => {
@@ -221,10 +209,10 @@ describe("Planner Reducer - Model Alignment Tests", () => {
     });
 
     const block = result.scheduledBlocks.monday[0];
-    assert.ok("estimateMinutes" in block);
-    assert.equal(typeof block.estimateMinutes, "number");
+    expect(block).toHaveProperty("estimateMinutes");
+    expect(typeof block.estimateMinutes).toBe("number");
     // @ts-expect-error - duration should not exist
-    assert.equal(block.duration, undefined);
+    expect(block.duration).toBeUndefined();
   });
 
   it("scheduled block references item (not copies all properties)", () => {
@@ -237,16 +225,14 @@ describe("Planner Reducer - Model Alignment Tests", () => {
 
     const block = result.scheduledBlocks.monday[0];
     
-    // Block has reference
-    assert.ok("planningItemId" in block);
-    assert.equal(block.planningItemId, "item-1");
+    expect(block).toHaveProperty("planningItemId");
+    expect(block.planningItemId).toBe("item-1");
     
-    // Block does NOT have item properties copied
     // @ts-expect-error - title should not be on block
-    assert.equal(block.title, undefined);
+    expect(block.title).toBeUndefined();
     // @ts-expect-error - type should not be on block
-    assert.equal(block.type, undefined);
+    expect(block.type).toBeUndefined();
     // @ts-expect-error - source should not be on block
-    assert.equal(block.source, undefined);
+    expect(block.source).toBeUndefined();
   });
 });
