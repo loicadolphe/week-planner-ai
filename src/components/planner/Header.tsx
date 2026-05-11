@@ -1,4 +1,5 @@
 import { formatWeekLabel, formatWeekNumber } from "@/lib/format";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface HeaderProps {
   weekOf: string;
@@ -44,6 +45,7 @@ export function Header({
         >
           Category bars
         </button>
+        <ThemeToggle />
       </div>
     </header>
   );

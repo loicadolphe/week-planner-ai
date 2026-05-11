@@ -117,8 +117,8 @@ function MobileBacklogItem({
 }) {
   return (
     <article
-      className={`relative rounded-[10px] border bg-white p-3 ${categoryClass(item.category)}`}
-      style={{ borderColor: "var(--line)" }}
+      className={`relative rounded-[10px] border p-3 ${categoryClass(item.category)}`}
+      style={{ background: "var(--surface)", borderColor: "var(--line)" }}
     >
       {item.category ? (
         <span

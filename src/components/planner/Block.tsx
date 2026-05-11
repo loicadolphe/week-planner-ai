@@ -34,11 +34,12 @@ export function Block({ block, planningItems, day, onUnschedule, draggable = tru
   return (
     <article
       ref={setNodeRef}
-      className={`relative rounded-[10px] border bg-white px-3 py-3 shadow-sm transition-colors ${categoryClass(
+      className={`relative rounded-[10px] border px-3 py-3 shadow-sm transition-colors ${categoryClass(
         item.category,
       )} ${isDragging ? "z-30 opacity-70" : ""}`}
       style={{
         ...style,
+        background: "var(--surface)",
         borderColor: "var(--line)",
       }}
       {...(draggable ? attributes : {})}
