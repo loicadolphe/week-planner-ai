@@ -1,4 +1,4 @@
-import type { Category } from "@/types/planner";
+import type { Category } from "@/types/planning";
 
 export const categoryLabels: Record<Category, string> = {
   work: "Work",

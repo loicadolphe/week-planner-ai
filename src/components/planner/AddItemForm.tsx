@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { Category, PlanningItem, PlanningType, Priority } from "@/types/planner";
+import type { Category, PlanningItem, PlanningItemType } from "@/types/planning";
 
-const typeOptions: { value: PlanningType; label: string }[] = [
+type Priority = "low" | "medium" | "high";
+
+const typeOptions: { value: PlanningItemType; label: string }[] = [
   { value: "task", label: "Task" },
   { value: "project", label: "Project" },
   { value: "meeting_prep", label: "Meeting prep" },
@@ -23,14 +25,14 @@ const categoryOptions: { value: Category; label: string }[] = [
 ];
 
 interface AddItemFormProps {
-  onAddItem: (input: Omit<PlanningItem, "id" | "createdAt">) => void;
+  onAddItem: (input: Omit<PlanningItem, "id">) => void;
 }
 
 export function AddItemForm({ onAddItem }: AddItemFormProps) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<Category | "">("work");
-  const [type, setType] = useState<PlanningType>("task");
-  const [priority, setPriority] = useState<Priority>("med");
+  const [type, setType] = useState<PlanningItemType>("task");
+  const [priority, setPriority] = useState<Priority>("medium");
   const [duration, setDuration] = useState("1");
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -44,14 +46,15 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
       title: trimmed,
       category: category || undefined,
       type,
+      source: "manual",
       priority,
-      duration: parsedDuration,
+      estimateMinutes: Math.round(parsedDuration * 60),
     });
 
     setTitle("");
     setCategory("work");
     setType("task");
-    setPriority("med");
+    setPriority("medium");
     setDuration("1");
   };
 
@@ -87,7 +90,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
           className="planner-input"
           aria-label="Type"
           value={type}
-          onChange={(event) => setType(event.target.value as PlanningType)}
+          onChange={(event) => setType(event.target.value as PlanningItemType)}
         >
           {typeOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -104,7 +107,7 @@ export function AddItemForm({ onAddItem }: AddItemFormProps) {
           onChange={(event) => setPriority(event.target.value as Priority)}
         >
           <option value="low">Low</option>
-          <option value="med">Med</option>
+          <option value="medium">Medium</option>
           <option value="high">High</option>
         </select>
         <input

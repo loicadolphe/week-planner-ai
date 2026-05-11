@@ -1,26 +1,28 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
-import type { DayKey, ScheduledBlock } from "@/types/planner";
+import type { WeekDay, ScheduledBlock, PlanningItem } from "@/types/planning";
 import { capacityState } from "@/lib/capacity";
-import { DAY_LABELS, DAY_ORDER, formatDayDate, sumHours } from "@/lib/format";
+import { DAY_LABELS, DAY_ORDER, formatDayDate, sumMinutes } from "@/lib/format";
 import { Block } from "./Block";
 import { CapacityIndicator } from "./CapacityIndicator";
 
 interface DayColumnProps {
-  day: DayKey;
+  day: WeekDay;
   blocks: ScheduledBlock[];
+  planningItems: PlanningItem[];
   weekOf: string;
-  onUnschedule: (blockId: string, day: DayKey) => void;
+  onUnschedule: (blockId: string, day: WeekDay) => void;
 }
 
-export function DayColumn({ day, blocks, weekOf, onUnschedule }: DayColumnProps) {
+export function DayColumn({ day, blocks, planningItems, weekOf, onUnschedule }: DayColumnProps) {
   const { isOver, setNodeRef } = useDroppable({
     id: `day:${day}`,
     data: { day },
   });
-  const planned = sumHours(blocks);
-  const { state } = capacityState(planned);
+  const plannedMinutes = sumMinutes(blocks);
+  const plannedHours = plannedMinutes / 60;
+  const { state } = capacityState(plannedHours);
   const dayIndex = DAY_ORDER.indexOf(day);
 
   return (
@@ -45,7 +47,7 @@ export function DayColumn({ day, blocks, weekOf, onUnschedule }: DayColumnProps)
             {blocks.length}
           </span>
         </div>
-        <CapacityIndicator planned={planned} />
+        <CapacityIndicator planned={plannedHours} />
       </header>
 
       <div className="flex flex-1 flex-col gap-2">
@@ -54,6 +56,7 @@ export function DayColumn({ day, blocks, weekOf, onUnschedule }: DayColumnProps)
             <Block
               key={block.id}
               block={block}
+              planningItems={planningItems}
               day={day}
               onUnschedule={onUnschedule}
             />

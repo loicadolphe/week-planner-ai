@@ -1,37 +1,38 @@
 import { format, getISOWeek } from "date-fns";
-import type { DayKey, ScheduledBlock } from "@/types/planner";
+import type { WeekDay, ScheduledBlock } from "@/types/planning";
 
-export const DAY_ORDER: DayKey[] = ["mon", "tue", "wed", "thu", "fri"];
+export const DAY_ORDER: WeekDay[] = ["monday", "tuesday", "wednesday", "thursday", "friday"];
 
-export const DAY_LABELS: Record<DayKey, string> = {
-  mon: "Monday",
-  tue: "Tuesday",
-  wed: "Wednesday",
-  thu: "Thursday",
-  fri: "Friday",
+export const DAY_LABELS: Record<WeekDay, string> = {
+  monday: "Monday",
+  tuesday: "Tuesday",
+  wednesday: "Wednesday",
+  thursday: "Thursday",
+  friday: "Friday",
 };
 
-export const DAY_SHORT_LABELS: Record<DayKey, string> = {
-  mon: "Mon",
-  tue: "Tue",
-  wed: "Wed",
-  thu: "Thu",
-  fri: "Fri",
+export const DAY_SHORT_LABELS: Record<WeekDay, string> = {
+  monday: "Mon",
+  tuesday: "Tue",
+  wednesday: "Wed",
+  thursday: "Thu",
+  friday: "Fri",
 };
 
-export function fmtDuration(hours: number): string {
+export function fmtDuration(minutes: number): string {
+  const hours = minutes / 60;
   const rounded = Math.round(hours * 4) / 4;
   const wholeHours = Math.floor(rounded);
-  const minutes = Math.round((rounded - wholeHours) * 60);
+  const remainingMinutes = Math.round((rounded - wholeHours) * 60);
 
-  if (wholeHours <= 0 && minutes <= 0) return "0h";
-  if (wholeHours <= 0) return `${minutes}m`;
-  if (minutes <= 0) return `${wholeHours}h`;
-  return `${wholeHours}h ${minutes}m`;
+  if (wholeHours <= 0 && remainingMinutes <= 0) return "0h";
+  if (wholeHours <= 0) return `${remainingMinutes}m`;
+  if (remainingMinutes <= 0) return `${wholeHours}h`;
+  return `${wholeHours}h ${remainingMinutes}m`;
 }
 
-export function sumHours(blocks: Pick<ScheduledBlock, "duration">[]): number {
-  return blocks.reduce((total, block) => total + block.duration, 0);
+export function sumMinutes(blocks: Pick<ScheduledBlock, "estimateMinutes">[]): number {
+  return blocks.reduce((total, block) => total + block.estimateMinutes, 0);
 }
 
 export function uid(prefix = "id"): string {

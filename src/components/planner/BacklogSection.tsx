@@ -1,19 +1,19 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Category, DayKey, PlanningItem } from "@/types/planner";
+import type { Category, WeekDay, PlanningItem } from "@/types/planning";
 import { AddItemForm } from "./AddItemForm";
 import { CategoryFilter, CategoryFilterChips } from "./CategoryFilterChips";
 import { Item } from "./Item";
 
 interface BacklogSectionProps {
   items: PlanningItem[];
-  dayTotals: Record<DayKey, number>;
+  dayTotals: Record<WeekDay, number>;
   filter: CategoryFilter;
   onFilterChange: (filter: CategoryFilter) => void;
-  onAddItem: (input: Omit<PlanningItem, "id" | "createdAt">) => void;
+  onAddItem: (input: Omit<PlanningItem, "id">) => void;
   onDeleteItem: (itemId: string) => void;
-  onSchedule: (itemId: string, day: DayKey) => void;
+  onSchedule: (itemId: string, day: WeekDay) => void;
 }
 
 export function BacklogSection({

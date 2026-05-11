@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { Goal } from "@/types/planner";
+import type { Goal } from "@/types/planning";
 
 interface GoalsSectionProps {
   goals: Goal[];
-  onAddGoal: (text: string) => void;
+  onAddGoal: (title: string) => void;
   onToggleGoal: (id: string) => void;
   onDeleteGoal: (id: string) => void;
 }
@@ -69,11 +69,11 @@ export function GoalsSection({
               className={`flex-1 text-[13px] leading-snug ${goal.done ? "line-through" : ""}`}
               style={{ color: goal.done ? "var(--ink-4)" : "var(--ink-2)" }}
             >
-              {goal.text}
+              {goal.title}
             </span>
             <button
               type="button"
-              aria-label={`Delete ${goal.text}`}
+              aria-label={`Delete ${goal.title}`}
               className="opacity-0 rounded-md px-1.5 text-[12px] transition-opacity group-hover:opacity-100"
               style={{ color: "var(--ink-4)" }}
               onClick={(event) => {

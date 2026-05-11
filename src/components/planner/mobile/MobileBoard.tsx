@@ -1,7 +1,7 @@
 "use client";
 
-import type { DayKey, PlanningItem, WeekPlan } from "@/types/planner";
-import { DAY_LABELS, DAY_ORDER, fmtDuration, sumHours } from "@/lib/format";
+import type { WeekDay, PlanningItem, WeekPlan } from "@/types/planning";
+import { DAY_LABELS, DAY_ORDER, fmtDuration, sumMinutes } from "@/lib/format";
 import { Block } from "../Block";
 import { CapacityIndicator } from "../CapacityIndicator";
 import { CategoryMark, categoryClass } from "../CategoryMark";
@@ -13,18 +13,22 @@ import type { MobileTab } from "./MobileTabs";
 
 interface MobileBoardProps {
   plan: WeekPlan;
+  backlogItems: PlanningItem[];
+  planningItems: PlanningItem[];
   activeTab: MobileTab;
-  selectedDay: DayKey;
-  onSelectDay: (day: DayKey) => void;
-  onSchedule: (itemId: string, day: DayKey) => void;
-  onUnschedule: (blockId: string, day: DayKey) => void;
-  onAddGoal: (text: string) => void;
+  selectedDay: WeekDay;
+  onSelectDay: (day: WeekDay) => void;
+  onSchedule: (itemId: string, day: WeekDay) => void;
+  onUnschedule: (blockId: string, day: WeekDay) => void;
+  onAddGoal: (title: string) => void;
   onToggleGoal: (id: string) => void;
   onDeleteGoal: (id: string) => void;
 }
 
 export function MobileBoard({
   plan,
+  backlogItems,
+  planningItems,
   activeTab,
   selectedDay,
   onSelectDay,
@@ -37,14 +41,14 @@ export function MobileBoard({
   if (activeTab === "backlog") {
     return (
       <div className="space-y-2">
-        {plan.backlog.map((item) => (
+        {backlogItems.map((item) => (
           <MobileBacklogItem
             key={item.id}
             item={item}
             onSchedule={onSchedule}
           />
         ))}
-        {plan.backlog.length === 0 ? (
+        {backlogItems.length === 0 ? (
           <div className="planner-card p-6 text-center text-[13px]" style={{ color: "var(--ink-4)" }}>
             Nothing unscheduled.
           </div>
@@ -64,8 +68,9 @@ export function MobileBoard({
     );
   }
 
-  const blocks = plan.blocks[selectedDay];
-  const planned = sumHours(blocks);
+  const blocks = plan.scheduledBlocks[selectedDay] || [];
+  const plannedMinutes = sumMinutes(blocks);
+  const plannedHours = plannedMinutes / 60;
 
   return (
     <div className="space-y-4">
@@ -76,7 +81,7 @@ export function MobileBoard({
             {DAY_LABELS[selectedDay]}
           </h2>
           <div className="mt-3">
-            <CapacityIndicator planned={planned} />
+            <CapacityIndicator planned={plannedHours} />
           </div>
         </header>
         <div className="space-y-2">
@@ -85,6 +90,7 @@ export function MobileBoard({
               <Block
                 key={block.id}
                 block={block}
+                planningItems={planningItems}
                 day={selectedDay}
                 onUnschedule={onUnschedule}
                 draggable={false}
@@ -107,7 +113,7 @@ function MobileBacklogItem({
   onSchedule,
 }: {
   item: PlanningItem;
-  onSchedule: (itemId: string, day: DayKey) => void;
+  onSchedule: (itemId: string, day: WeekDay) => void;
 }) {
   return (
     <article
@@ -125,7 +131,7 @@ function MobileBacklogItem({
         {item.title}
       </h3>
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]" style={{ color: "var(--ink-3)" }}>
-        <span className="mono">{fmtDuration(item.duration)}</span>
+        <span className="mono">{fmtDuration(item.estimateMinutes || 60)}</span>
         <TypeLabel type={item.type} />
         <PriorityDot priority={item.priority} />
         <CategoryMark category={item.category} />
@@ -135,7 +141,7 @@ function MobileBacklogItem({
         defaultValue=""
         aria-label={`Schedule ${item.title}`}
         onChange={(event) => {
-          const day = event.target.value as DayKey;
+          const day = event.target.value as WeekDay;
           if (day) onSchedule(item.id, day);
           event.currentTarget.value = "";
         }}

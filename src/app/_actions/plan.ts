@@ -1,10 +1,10 @@
-import type { DayKey, Goal, PlanningItem } from "@/types/planner";
+import type { WeekDay, Goal, PlanningItem } from "@/types/planning";
 import { uid } from "@/lib/format";
 
-export async function addGoal(text: string): Promise<Goal> {
+export async function addGoal(title: string): Promise<Goal> {
   return {
     id: uid("goal"),
-    text,
+    title,
     done: false,
   };
 }
@@ -20,12 +20,11 @@ export async function deleteGoal(id: string): Promise<void> {
 }
 
 export async function addPlanningItem(
-  input: Omit<PlanningItem, "id" | "createdAt">,
+  input: Omit<PlanningItem, "id">,
 ): Promise<PlanningItem> {
   return {
     ...input,
     id: uid("item"),
-    createdAt: new Date().toISOString(),
   };
 }
 
@@ -36,7 +35,7 @@ export async function deletePlanningItem(id: string): Promise<void> {
 
 export async function scheduleItem(
   itemId: string,
-  day: DayKey,
+  day: WeekDay,
 ): Promise<void> {
   void itemId;
   void day;
@@ -45,8 +44,8 @@ export async function scheduleItem(
 
 export async function moveBlock(
   blockId: string,
-  fromDay: DayKey,
-  toDay: DayKey,
+  fromDay: WeekDay,
+  toDay: WeekDay,
 ): Promise<void> {
   void blockId;
   void fromDay;
@@ -56,7 +55,7 @@ export async function moveBlock(
 
 export async function unscheduleBlock(
   blockId: string,
-  day: DayKey,
+  day: WeekDay,
 ): Promise<void> {
   void blockId;
   void day;

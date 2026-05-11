@@ -16,8 +16,8 @@ import { Header } from "@/components/planner/Header";
 import { WeekBoard } from "@/components/planner/WeekBoard";
 import { MobileBoard } from "@/components/planner/mobile/MobileBoard";
 import { MobileTab, MobileTabs } from "@/components/planner/mobile/MobileTabs";
-import { DAY_ORDER, sumHours, uid } from "@/lib/format";
-import type { DayKey, Goal, PlanningItem, WeekPlan } from "@/types/planner";
+import { DAY_ORDER, sumMinutes, uid } from "@/lib/format";
+import type { WeekDay, Goal, PlanningItem, WeekPlan } from "@/types/planning";
 
 const STORAGE_KEY = "week-planner-ai:m1-plan";
 
@@ -28,9 +28,9 @@ type PlannerAction =
   | { type: "delete_goal"; id: string }
   | { type: "add_item"; item: PlanningItem }
   | { type: "delete_item"; id: string }
-  | { type: "schedule_item"; itemId: string; day: DayKey }
-  | { type: "move_block"; blockId: string; fromDay: DayKey; toDay: DayKey }
-  | { type: "unschedule_block"; blockId: string; day: DayKey };
+  | { type: "schedule_item"; itemId: string; day: WeekDay }
+  | { type: "move_block"; blockId: string; fromDay: WeekDay; toDay: WeekDay }
+  | { type: "unschedule_block"; blockId: string; day: WeekDay };
 
 interface PlannerClientProps {
   initialPlan: WeekPlan;
@@ -43,7 +43,7 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
   const [filter, setFilter] = useState<CategoryFilter>("all");
   const [showCategoryBars, setShowCategoryBars] = useState(true);
   const [mobileTab, setMobileTab] = useState<MobileTab>("plan");
-  const [selectedDay, setSelectedDay] = useState<DayKey>("mon");
+  const [selectedDay, setSelectedDay] = useState<WeekDay>("monday");
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   useEffect(() => {
@@ -64,21 +64,33 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
     }
   }, [hydrated, plan]);
 
+  const backlogItems = useMemo(
+    () => {
+      const scheduledItemIds = new Set(
+        Object.values(plan.scheduledBlocks)
+          .flat()
+          .map((block) => block.planningItemId)
+      );
+      return plan.planningItems.filter((item) => !scheduledItemIds.has(item.id));
+    },
+    [plan.planningItems, plan.scheduledBlocks]
+  );
+
   const dayTotals = useMemo(
     () =>
       DAY_ORDER.reduce(
         (totals, day) => ({
           ...totals,
-          [day]: sumHours(plan.blocks[day]),
+          [day]: sumMinutes(plan.scheduledBlocks[day] || []),
         }),
-        {} as Record<DayKey, number>,
+        {} as Record<WeekDay, number>,
       ),
-    [plan.blocks],
+    [plan.scheduledBlocks],
   );
 
-  const handleAddGoal = (text: string) => {
+  const handleAddGoal = (title: string) => {
     void (async () => {
-      const goal = await planActions.addGoal(text);
+      const goal = await planActions.addGoal(title);
       dispatch({ type: "add_goal", goal });
     })();
   };
@@ -111,7 +123,7 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
     })();
   };
 
-  const handleSchedule = (itemId: string, day: DayKey) => {
+  const handleSchedule = (itemId: string, day: WeekDay) => {
     void (async () => {
       await planActions.scheduleItem(itemId, day);
       dispatch({ type: "schedule_item", itemId, day });
@@ -120,7 +132,7 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
     })();
   };
 
-  const handleMoveBlock = (blockId: string, fromDay: DayKey, toDay: DayKey) => {
+  const handleMoveBlock = (blockId: string, fromDay: WeekDay, toDay: WeekDay) => {
     void (async () => {
       await planActions.moveBlock(blockId, fromDay, toDay);
       dispatch({ type: "move_block", blockId, fromDay, toDay });
@@ -128,7 +140,7 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
     })();
   };
 
-  const handleUnschedule = (blockId: string, day: DayKey) => {
+  const handleUnschedule = (blockId: string, day: WeekDay) => {
     void (async () => {
       await planActions.unscheduleBlock(blockId, day);
       dispatch({ type: "unschedule_block", blockId, day });
@@ -139,7 +151,7 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
     const overId = event.over?.id;
     if (!overId || typeof overId !== "string" || !overId.startsWith("day:")) return;
 
-    const day = overId.replace("day:", "") as DayKey;
+    const day = overId.replace("day:", "") as WeekDay;
     if (!DAY_ORDER.includes(day)) return;
 
     const data = event.active.data.current;
@@ -150,9 +162,9 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
     if (
       data?.kind === "block" &&
       typeof data.blockId === "string" &&
-      DAY_ORDER.includes(data.fromDay as DayKey)
+      DAY_ORDER.includes(data.fromDay as WeekDay)
     ) {
-      handleMoveBlock(data.blockId, data.fromDay as DayKey, day);
+      handleMoveBlock(data.blockId, data.fromDay as WeekDay, day);
     }
   };
 
@@ -171,7 +183,7 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
             <main className="mx-auto grid w-full max-w-[1500px] grid-cols-[360px_1fr] gap-4 px-5 pb-8">
               <div className="space-y-4">
                 <BacklogSection
-                  items={plan.backlog}
+                  items={backlogItems}
                   dayTotals={dayTotals}
                   filter={filter}
                   onFilterChange={setFilter}
@@ -186,7 +198,7 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
                   onDeleteGoal={handleDeleteGoal}
                 />
               </div>
-              <WeekBoard plan={plan} onUnschedule={handleUnschedule} />
+              <WeekBoard plan={plan} planningItems={plan.planningItems} onUnschedule={handleUnschedule} />
             </main>
           </DndContext>
         </div>
@@ -204,13 +216,15 @@ export function PlannerClient({ initialPlan, forceMobile = false }: PlannerClien
         <div className="mb-4">
           <MobileTabs
             activeTab={mobileTab}
-            backlogCount={plan.backlog.length}
+            backlogCount={backlogItems.length}
             goalsCount={plan.goals.filter((goal) => !goal.done).length}
             onChange={setMobileTab}
           />
         </div>
         <MobileBoard
           plan={plan}
+          backlogItems={backlogItems}
+          planningItems={plan.planningItems}
           activeTab={mobileTab}
           selectedDay={selectedDay}
           onSelectDay={setSelectedDay}
@@ -244,79 +258,64 @@ function plannerReducer(plan: WeekPlan, action: PlannerAction): WeekPlan {
         goals: plan.goals.filter((goal) => goal.id !== action.id),
       };
     case "add_item":
-      return { ...plan, backlog: [action.item, ...plan.backlog] };
+      return { ...plan, planningItems: [action.item, ...plan.planningItems] };
     case "delete_item":
       return {
         ...plan,
-        backlog: plan.backlog.filter((item) => item.id !== action.id),
+        planningItems: plan.planningItems.filter((item) => item.id !== action.id),
       };
     case "schedule_item": {
-      const item = plan.backlog.find((backlogItem) => backlogItem.id === action.itemId);
+      const item = plan.planningItems.find((planningItem) => planningItem.id === action.itemId);
       if (!item) return plan;
 
       const block = {
         id: uid("block"),
-        title: item.title,
-        category: item.category,
-        type: item.type,
-        priority: item.priority,
-        duration: item.duration,
-        scheduledAt: scheduledDate(plan.weekOf, action.day),
+        planningItemId: item.id,
+        day: action.day,
+        estimateMinutes: item.estimateMinutes || 60,
       };
 
       return {
         ...plan,
-        backlog: plan.backlog.filter((backlogItem) => backlogItem.id !== action.itemId),
-        blocks: {
-          ...plan.blocks,
-          [action.day]: [...plan.blocks[action.day], block],
+        scheduledBlocks: {
+          ...plan.scheduledBlocks,
+          [action.day]: [...(plan.scheduledBlocks[action.day] || []), block],
         },
       };
     }
     case "move_block": {
       if (action.fromDay === action.toDay) return plan;
 
-      const block = plan.blocks[action.fromDay].find(
+      const block = (plan.scheduledBlocks[action.fromDay] || []).find(
         (scheduledBlock) => scheduledBlock.id === action.blockId,
       );
       if (!block) return plan;
 
       return {
         ...plan,
-        blocks: {
-          ...plan.blocks,
-          [action.fromDay]: plan.blocks[action.fromDay].filter(
+        scheduledBlocks: {
+          ...plan.scheduledBlocks,
+          [action.fromDay]: (plan.scheduledBlocks[action.fromDay] || []).filter(
             (scheduledBlock) => scheduledBlock.id !== action.blockId,
           ),
           [action.toDay]: [
-            ...plan.blocks[action.toDay],
-            { ...block, scheduledAt: scheduledDate(plan.weekOf, action.toDay) },
+            ...(plan.scheduledBlocks[action.toDay] || []),
+            { ...block, day: action.toDay },
           ],
         },
       };
     }
     case "unschedule_block": {
-      const block = plan.blocks[action.day].find(
+      const block = (plan.scheduledBlocks[action.day] || []).find(
         (scheduledBlock) => scheduledBlock.id === action.blockId,
       );
       if (!block) return plan;
 
-      const item: PlanningItem = {
-        id: uid("item"),
-        title: block.title,
-        category: block.category,
-        type: block.type,
-        priority: block.priority,
-        duration: block.duration,
-        createdAt: new Date().toISOString(),
-      };
-
       return {
         ...plan,
-        backlog: [item, ...plan.backlog],
-        blocks: {
-          ...plan.blocks,
-          [action.day]: plan.blocks[action.day].filter(
+        scheduledBlocks: {
+          ...plan.scheduledBlocks,
+          [action.day]: (plan.scheduledBlocks[action.day] || []).filter(
             (scheduledBlock) => scheduledBlock.id !== action.blockId,
           ),
         },
@@ -325,10 +324,4 @@ function plannerReducer(plan: WeekPlan, action: PlannerAction): WeekPlan {
     default:
       return plan;
   }
-}
-
-function scheduledDate(weekOf: string, day: DayKey): string {
-  const date = new Date(`${weekOf}T00:00:00`);
-  date.setDate(date.getDate() + DAY_ORDER.indexOf(day));
-  return date.toISOString().slice(0, 10);
 }

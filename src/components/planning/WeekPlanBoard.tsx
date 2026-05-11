@@ -53,7 +53,7 @@ export function WeekPlanBoard({ weekPlan, onMoveBlock, onRemoveBlock }: WeekPlan
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {weekDays.map(({ key, label }) => {
-          const blocks = weekPlan[key];
+          const blocks = weekPlan.scheduledBlocks[key] || [];
           const totalMinutes = getTotalMinutes(blocks);
           const overloaded = isOverloaded(totalMinutes);
 
@@ -86,7 +86,10 @@ export function WeekPlanBoard({ weekPlan, onMoveBlock, onRemoveBlock }: WeekPlan
                   </p>
                 ) : (
                   blocks.map((block) => {
+                    const item = weekPlan.planningItems.find(i => i.id === block.planningItemId);
                     const timeRange = formatTimeRange(block.startTime, block.endTime);
+                    
+                    if (!item) return null;
                     
                     return (
                       <div
@@ -99,7 +102,7 @@ export function WeekPlanBoard({ weekPlan, onMoveBlock, onRemoveBlock }: WeekPlan
                           </div>
                         )}
                         <p className="text-sm font-medium text-zinc-900 dark:text-white mb-1">
-                          {block.title}
+                          {item.title}
                         </p>
                         <p className="text-xs text-zinc-600 dark:text-zinc-400 mb-2">
                           {formatMinutes(block.estimateMinutes)}

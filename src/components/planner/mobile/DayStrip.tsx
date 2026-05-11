@@ -1,19 +1,20 @@
-import type { DayKey, WeekPlan } from "@/types/planner";
-import { DAY_ORDER, DAY_SHORT_LABELS, sumHours } from "@/lib/format";
+import type { WeekDay, WeekPlan } from "@/types/planning";
+import { DAY_ORDER, DAY_SHORT_LABELS, sumMinutes } from "@/lib/format";
 import { DAY_CAPACITY_HOURS, capacityState } from "@/lib/capacity";
 
 interface DayStripProps {
   plan: WeekPlan;
-  selectedDay: DayKey;
-  onSelectDay: (day: DayKey) => void;
+  selectedDay: WeekDay;
+  onSelectDay: (day: WeekDay) => void;
 }
 
 export function DayStrip({ plan, selectedDay, onSelectDay }: DayStripProps) {
   return (
     <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
       {DAY_ORDER.map((day) => {
-        const planned = sumHours(plan.blocks[day]);
-        const { state, ratio } = capacityState(planned);
+        const plannedMinutes = sumMinutes(plan.scheduledBlocks[day] || []);
+        const plannedHours = plannedMinutes / 60;
+        const { state, ratio } = capacityState(plannedHours);
         const isSelected = day === selectedDay;
 
         return (
@@ -44,7 +45,7 @@ export function DayStrip({ plan, selectedDay, onSelectDay }: DayStripProps) {
               ) : null}
             </span>
             <span className="mono mt-1 block text-[10px]" style={{ color: isSelected ? "var(--ink-5)" : "var(--ink-3)" }}>
-              {planned}/{DAY_CAPACITY_HOURS}h
+              {plannedHours.toFixed(1)}/{DAY_CAPACITY_HOURS}h
             </span>
           </button>
         );

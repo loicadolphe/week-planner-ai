@@ -1,13 +1,14 @@
-import type { DayKey, WeekPlan } from "@/types/planner";
+import type { WeekDay, WeekPlan, PlanningItem } from "@/types/planning";
 import { DAY_ORDER } from "@/lib/format";
 import { DayColumn } from "./DayColumn";
 
 interface WeekBoardProps {
   plan: WeekPlan;
-  onUnschedule: (blockId: string, day: DayKey) => void;
+  planningItems: PlanningItem[];
+  onUnschedule: (blockId: string, day: WeekDay) => void;
 }
 
-export function WeekBoard({ plan, onUnschedule }: WeekBoardProps) {
+export function WeekBoard({ plan, planningItems, onUnschedule }: WeekBoardProps) {
   return (
     <section className="planner-card p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -25,7 +26,8 @@ export function WeekBoard({ plan, onUnschedule }: WeekBoardProps) {
           <DayColumn
             key={day}
             day={day}
-            blocks={plan.blocks[day]}
+            blocks={plan.scheduledBlocks[day] || []}
+            planningItems={planningItems}
             weekOf={plan.weekOf}
             onUnschedule={onUnschedule}
           />
